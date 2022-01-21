@@ -1,0 +1,42 @@
+ARG BASE_IMAGE="centos:centos8"
+FROM $BASE_IMAGE AS install_tools
+ARG DISTRO=centos
+ENV INST_SCRIPTS=install
+
+### Install Requirements
+COPY ./src/common/install $INST_SCRIPTS/common/
+RUN bash $INST_SCRIPTS/common/install_base.sh 
+RUN bash $INST_SCRIPTS/common/install_tools.sh
+RUN bash $INST_SCRIPTS/common/install_vnc.sh
+RUN rm -rf $INST_SCRIPTS/common/
+
+# add a default redirect page to the novnc vnc.html page with correct query string parameters
+COPY ./src/common/novnc/index.html /usr/share/novnc
+
+COPY ./src/apps $INST_SCRIPTS/apps/
+RUN bash $INST_SCRIPTS/apps/install_chrome.sh 
+RUN rm -rf $INST_SCRIPTS/apps/
+
+# Removing VNC password altogether, this is intended to be behind OAuth middleware or Traefik Auth
+# RUN mkdir ~/.vnc && echo thepassword | vncpasswd -f > ~/.vnc/passwd
+# RUN chmod 0600 ~/.vnc/passwd
+
+#ENV USER vuser
+RUN groupadd  vuser && useradd -m -g vuser vuser
+USER vuser
+WORKDIR /home/vuser
+
+# RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+# systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+# rm -f /lib/systemd/system/multi-user.target.wants/*;\
+# rm -f /etc/systemd/system/*.wants/*;\
+# rm -f /lib/systemd/system/local-fs.target.wants/*; \
+# rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+# rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+# rm -f /lib/systemd/system/basic.target.wants/*;\
+# rm -f /lib/systemd/system/anaconda.target.wants/*;
+
+CMD USER=vuser && export USER && vncserver :3 -SecurityTypes None && DISPLAY=localhost:3 && export DISPLAY && /usr/share/novnc/utils/launch.sh --listen 6082 --vnc localhost:5903
+
+# NoVNC port, Traefik will pick this one up automatically
+EXPOSE 6082

@@ -1,0 +1,53 @@
+version: "3.7"
+services:
+
+# traefik.docker.localhost
+  traefik:
+    image: traefik:latest
+    container_name: "traefik"
+    restart: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    ports:
+      - "80:80"
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--serversTransport.insecureSkipVerify=true"
+      - "--log.level=INFO"
+      - "--log.format=json"
+      - "--log.filePath=/logs/traefik.json"
+      - "--entryPoints.web.address=:80"
+      - "--providers.docker=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedByDefault=true"
+      - "--providers.docker.defaultRule=Host(`{{ index .Labels \"com.docker.compose.service\" }}.docker.localhost`)"
+    labels:
+      - "traefik.http.routers.traefik-rtr.service=api@internal"
+
+
+  # debiancore.docker.localhost
+  debiancore:
+    build:
+      cache_from:
+        - debian:bullseye
+      context: .
+      dockerfile: dockerfile-core-debian
+    image: "papina/container-desktop:debian"
+    container_name: "debiancore"
+    volumes:
+      - "/Users/benjamin/Documents/TrustyPangolin/container-desktop/src/vuser/Desktop:/home/vuser/Desktop"
+
+  # debianaws.docker.localhost
+  debianaws:
+    build:
+      cache_from:
+        - debian:bullseye
+        - papina/container-desktop:debian
+      context: .
+      dockerfile: dockerfile-aws-debian
+    image: "papina/container-desktop:aws"
+    container_name: "debianaws"
+    volumes:
+      - ~/.aws:/home/vuser/.aws

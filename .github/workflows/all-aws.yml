@@ -1,0 +1,58 @@
+name: aws-all
+
+on:
+  # push:
+  #   branches:
+  #     - 'main'
+  workflow_dispatch:
+
+jobs:
+  # dockercentos:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     -
+  #       name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v1
+  #     -
+  #       name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v1
+  #     -
+  #       name: Login to DockerHub
+  #       uses: docker/login-action@v1 
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     -
+  #       name: Build and push
+  #       id: docker_build_centos_aws
+  #       uses: docker/build-push-action@v2
+  #       with:
+  #         push: true
+  #         file: dockerfile-aws-centos
+  #         tags: papina/container-desktop:centos-aws
+  #         platforms: linux/amd64,linux/arm64
+
+  dockerdebian:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        id: docker_build_debian_aws
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: dockerfile-aws-debian
+          tags: papina/container-desktop:debian-aws
+          platforms: linux/amd64,linux/arm64

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=Firefox
+Exec=/usr/bin/firefox
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=/usr/share/firefox-esr/browser/chrome/icons/default/default128.png
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;x-scheme-handler/http;x-scheme-handler/https;
+StartupNotify=true
+
+

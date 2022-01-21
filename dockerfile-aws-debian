@@ -1,0 +1,33 @@
+ARG BASE_IMAGE="papina/container-desktop:debian"
+FROM $BASE_IMAGE AS install_tools
+ARG DISTRO=debian
+ENV INST_SCRIPTS=install
+ENV DEBIAN_FRONTEND noninteractive
+
+### Copy Install Scripts and pre-update the OS
+COPY ./src/common/install $INST_SCRIPTS/common/
+COPY ./src/apps $INST_SCRIPTS/apps/
+COPY ./src/custom/*.sh $INST_SCRIPTS/custom/
+RUN bash $INST_SCRIPTS/common/base_update.sh 
+
+# AWS
+RUN bash $INST_SCRIPTS/custom/install_aws.sh 
+
+# DBEAVER
+RUN bash $INST_SCRIPTS/custom/install_dbeaver.sh 
+
+# VSCODE
+RUN bash $INST_SCRIPTS/custom/install_vscode.sh 
+
+RUN bash $INST_SCRIPTS/common/base_cleanup.sh
+RUN rm -rf $INST_SCRIPTS/apps/
+RUN rm -rf $INST_SCRIPTS/common/
+RUN rm -rf $INST_SCRIPTS/custom/
+
+COPY ./src/custom/profile/vuser /home/vuser
+RUN chown -R 1000:0 /home/vuser
+
+COPY ./src/common/supervisor/supervisord.conf /etc/supervisord.conf
+CMD /usr/bin/supervisord
+# NoVNC port, Traefik will pick this one up automatically
+EXPOSE 6082

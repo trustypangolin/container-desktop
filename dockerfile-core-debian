@@ -1,0 +1,42 @@
+ARG BASE_IMAGE="debian:bullseye"
+FROM $BASE_IMAGE AS install_tools
+ARG DISTRO=debian
+ENV INST_SCRIPTS=install
+ENV DEBIAN_FRONTEND noninteractive
+
+### Copy Install Scripts and pre-update the OS
+COPY ./src/common/install $INST_SCRIPTS/common/
+COPY ./src/apps $INST_SCRIPTS/apps/
+RUN bash $INST_SCRIPTS/common/base_update.sh 
+
+# Install the various base tools
+RUN bash $INST_SCRIPTS/common/install_tools.sh 
+RUN bash $INST_SCRIPTS/common/install_gui.sh
+RUN bash $INST_SCRIPTS/common/install_vnc.sh
+RUN bash $INST_SCRIPTS/apps/install_firefox.sh
+
+# Add a default redirect page to the novnc vnc.html page with correct query string parameters
+COPY ./src/common/novnc/index.html /usr/share/novnc
+
+# Removing VNC password altogether, this is intended to be behind OAuth middleware or Traefik Auth
+# RUN mkdir ~/.vnc && echo thepassword | vncpasswd -f > ~/.vnc/passwd
+# RUN chmod 0600 ~/.vnc/passwd
+
+#ENV USER vuser
+RUN groupadd vuser && useradd -m -g vuser vuser
+RUN usermod -aG sudo vuser
+COPY ./src/vuser /home/vuser
+RUN chown -R vuser:vuser /home/vuser
+RUN echo "vuser:vuser" | chpasswd
+RUN echo "vuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vuser
+
+RUN bash $INST_SCRIPTS/common/base_cleanup.sh
+RUN rm -rf $INST_SCRIPTS/apps/
+RUN rm -rf $INST_SCRIPTS/common/
+
+COPY ./src/custom/profile/vuser/Desktop/firefox.desktop /home/vuser/Desktop/firefox.desktop
+COPY ./src/common/supervisor/supervisord.conf /etc/supervisord.conf
+CMD /usr/bin/supervisord
+
+# NoVNC port, Traefik will pick this one up automatically
+EXPOSE 6082

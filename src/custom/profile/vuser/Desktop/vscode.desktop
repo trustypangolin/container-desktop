@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Name=VSCode
+GenericName=VSCode
+Comment=VSCode
+Path=/usr/bin/
+Exec=/usr/bin/code --no-sandbox
+Icon=/usr/share/code/resources/app/resources/linux/code.png
+Categories=IDE;Development
+StartupNotify=true
