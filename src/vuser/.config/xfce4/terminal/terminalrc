@@ -1,0 +1,6 @@
+[Configuration]
+CustomCommand=/bin/bash
+RunCustomCommand=TRUE
+MiscDefaultGeometry=100x24
+BackgroundMode=TERMINAL_BACKGROUND_TRANSPARENT
+BackgroundDarkness=0.750000
