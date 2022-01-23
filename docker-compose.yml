@@ -39,15 +39,15 @@ services:
     volumes:
       - "/Users/benjamin/Documents/TrustyPangolin/container-desktop/src/vuser/Desktop:/home/vuser/Desktop"
 
-  # debianaws.docker.localhost
-  debianaws:
+  # debian-aws.docker.localhost
+  debian-aws:
     build:
       cache_from:
         - debian:bullseye
         - papina/container-desktop:debian
       context: .
       dockerfile: dockerfile-aws-debian
-    image: "papina/container-desktop:aws"
-    container_name: "debianaws"
+    image: "papina/container-desktop:debian-aws"
+    container_name: "debian-aws"
     volumes:
       - ~/.aws:/home/vuser/.aws
